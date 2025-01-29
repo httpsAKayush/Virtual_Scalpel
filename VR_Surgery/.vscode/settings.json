@@ -56,5 +56,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "temp.sln"
+    "dotnet.defaultSolution": "VR_Surgery.sln"
 }
