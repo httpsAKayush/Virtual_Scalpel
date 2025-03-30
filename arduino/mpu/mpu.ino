@@ -1,108 +1,56 @@
-#include <Wire.h>
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
-#include <math.h>
+#include <Wire.h>
+#include <math.h>  // Required for atan2() and M_PI
 
 Adafruit_MPU6050 mpu;
 
-// Angle variables
-float roll = 0, pitch = 0, yaw = 0;
-float gyro_bias_x = 0, gyro_bias_y = 0, gyro_bias_z = 0;
-unsigned long last_time = 0;
-
-float normalizeAngle(float angle) {
-  angle = fmod(angle + 180, 360);
-  if (angle < 0) angle += 360;
-  return angle - 180;
-}
-
-void setup() {
+void setup(void) {
   Serial.begin(115200);
-  Wire.begin(4, 5);  // SDA -> D2 (GPIO4), SCL -> D1 (GPIO5)
+  while (!Serial)
+    delay(10);
+
+  Serial.println("Adafruit MPU6050 Angle Test!");
 
   if (!mpu.begin()) {
     Serial.println("Failed to find MPU6050 chip");
-    while (1) { delay(10); }
+    while (1) delay(10);
   }
+  Serial.println("MPU6050 Found!");
 
   mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
   mpu.setGyroRange(MPU6050_RANGE_500_DEG);
-  mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+  mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);
+
+  Serial.println("");
   delay(100);
-
-  // Gyro calibration
-  Serial.println("Calibrating gyro...");
-  const int num_samples = 500;
-  float gx = 0, gy = 0, gz = 0;
-  
-  for(int i = 0; i < num_samples; i++) {
-    sensors_event_t a, g, temp;
-    mpu.getEvent(&a, &g, &temp);
-    gx += g.gyro.x;
-    gy += g.gyro.y;
-    gz += g.gyro.z;
-    delay(1);
-  }
-  gyro_bias_x = gx / num_samples;
-  gyro_bias_y = gy / num_samples;
-  gyro_bias_z = gz / num_samples;
-
-  // Initial angles from accelerometer
-  sensors_event_t a, g, temp;
-  mpu.getEvent(&a, &g, &temp);
-  float accelX = a.acceleration.x;
-  float accelY = a.acceleration.y;
-  float accelZ = a.acceleration.z;
-
-  roll = atan2(accelY, accelZ) * RAD_TO_DEG;
-  pitch = atan2(-accelX, sqrt(accelY*accelY + accelZ*accelZ)) * RAD_TO_DEG;
-  
-  last_time = millis();
 }
-
-
 
 void loop() {
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
 
-  // Convert gyro to deg/s and remove bias
-  float gyro_x = (g.gyro.x - gyro_bias_x) * RAD_TO_DEG;
-  float gyro_y = (g.gyro.y - gyro_bias_y) * RAD_TO_DEG;
-  float gyro_z = (g.gyro.z - gyro_bias_z) * RAD_TO_DEG;
+  // Calculate Roll and Pitch (in radians) from accelerometer
+  float roll_rad = atan2(a.acceleration.y, sqrt(a.acceleration.x * a.acceleration.x + a.acceleration.z * a.acceleration.z));
+  float pitch_rad = atan2(-a.acceleration.x, sqrt(a.acceleration.y * a.acceleration.y + a.acceleration.z * a.acceleration.z));
 
-  // Calculate time difference
-  unsigned long current_time = millis();
-  float dt = (current_time - last_time) / 1000.0;
-  last_time = current_time;
+  // Convert to degrees
+  float roll_deg = roll_rad * 180.0 / M_PI;
+  float pitch_deg = pitch_rad * 180.0 / M_PI;
 
-  // Calculate accelerometer angles
-  float accelX = a.acceleration.x;
-  float accelY = a.acceleration.y;
-  float accelZ = a.acceleration.z;
+  // Print Accelerometer and Angle Data
+  Serial.print("Accel X: "); Serial.print(a.acceleration.x); Serial.print(" m/s², ");
+  Serial.print("Y: "); Serial.print(a.acceleration.y); Serial.print(" m/s², ");
+  Serial.print("Z: "); Serial.print(a.acceleration.z); Serial.println(" m/s²");
 
-  float roll_acc = atan2(accelY, accelZ) * RAD_TO_DEG;
-  float pitch_acc = atan2(-accelX, sqrt(accelY*accelY + accelZ*accelZ)) * RAD_TO_DEG;
+  Serial.print("Roll: "); Serial.print(roll_deg); Serial.print("° | ");
+  Serial.print("Pitch: "); Serial.print(pitch_deg); Serial.println("°");
 
-  // Complementary filter
-  const float alpha = 0.98;
-  roll = alpha * (roll + gyro_x * dt) + (1 - alpha) * roll_acc;
-  pitch = alpha * (pitch + gyro_y * dt) + (1 - alpha) * pitch_acc;
-  yaw += gyro_z * dt;
+  Serial.print("Gyro X: "); Serial.print(g.gyro.x * 57.2958); Serial.print("°/s, ");
+  Serial.print("Y: "); Serial.print(g.gyro.y * 57.2958); Serial.print("°/s, ");
+  Serial.print("Z: "); Serial.print(g.gyro.z * 57.2958); Serial.println("°/s");
 
-  // Normalize angles
-  roll = normalizeAngle(roll);
-  pitch = normalizeAngle(pitch);
-  yaw = normalizeAngle(yaw);
-
-  // Serial output
-  Serial.print("Roll: ");
-  Serial.print(roll);
-  Serial.print("°, Pitch: ");
-  Serial.print(pitch);
-  Serial.print("°, Yaw: ");
-  Serial.print(yaw);
-  Serial.println("°");
-
-  delay(10);
+  Serial.print("Temp: "); Serial.print(temp.temperature); Serial.println(" °C");
+  Serial.println("---------------------");
+  delay(500);
 }
