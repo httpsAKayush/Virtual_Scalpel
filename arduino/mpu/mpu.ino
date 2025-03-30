@@ -35,8 +35,11 @@ void loop() {
   float pitch_rad = atan2(-a.acceleration.x, sqrt(a.acceleration.y * a.acceleration.y + a.acceleration.z * a.acceleration.z));
 
   // Convert to degrees
-  float roll_deg = roll_rad * 180.0 / M_PI;
-  float pitch_deg = pitch_rad * 180.0 / M_PI;
+  float roll_deg = roll_rad * 180.0 / M_PI;        //x axis
+  float pitch_deg = pitch_rad * 180.0 / M_PI;      //y axis
+
+
+  //only their is 6 degree of freedom 
 
   // Print Accelerometer and Angle Data
   Serial.print("Accel X: "); Serial.print(a.acceleration.x); Serial.print(" m/s², ");
