@@ -40,6 +40,7 @@ void loop() {
 
 
   //only their is 6 degree of freedom 
+  //their is no magnetometer reading in mpu6050 
 
   // Print Accelerometer and Angle Data
   Serial.print("Accel X: "); Serial.print(a.acceleration.x); Serial.print(" m/s², ");
