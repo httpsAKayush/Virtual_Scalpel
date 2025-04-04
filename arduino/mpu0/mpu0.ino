@@ -129,7 +129,7 @@ void loop() {
 
   pry[0] = gyAcMix * (pry[0] + gyDeltaPRY[0] * timeDelta ) + (1-gyAcMix) * (acPR[0]);
   pry[1] = gyAcMix * (pry[1] + gyDeltaPRY[1] * timeDelta) + (1-gyAcMix) * (acPR[1]);
-  pry[2] = pry[2] + gyDeltaPRY[2] * timeDelta;
+  pry[2] = pry[2] + gyDeltaPRY[2] * timeDelta + 1.73099999* timeDelta; // Added drift to yaw
 
   timePrev = timeNow;
 
