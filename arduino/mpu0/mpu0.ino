@@ -10,7 +10,7 @@ IPAddress staticIP(192, 168, 137, 50);
 IPAddress gateway(192, 168, 137, 1);
 IPAddress subnet(255, 255, 255, 0);
 IPAddress pcIP(192, 168, 137, 1);  // Replace with your PC's IP
-unsigned int port = 25666;
+unsigned int port = 25665;
 
 WiFiUDP Udp;
 
@@ -21,7 +21,7 @@ float acReadings[3][AC_NUM_TO_AVG + 1];
 int acAvgIndex = 0;
 float acInst[3] = {0,0,0};
 float acAvg[3] = {0,0,0};
-float acPR[2] = {0,0};
+float acPR[2] = {0,0};    
 float gyDeltaPRY[3] = {0,0,0};
 float acGyOffset[6] = {-247.69, -133.50, -68.48, 905.85, -151.32, -110.68};
 float gyAcMix = 0.95;
@@ -129,7 +129,7 @@ void loop() {
 
   pry[0] = gyAcMix * (pry[0] + gyDeltaPRY[0] * timeDelta ) + (1-gyAcMix) * (acPR[0]);
   pry[1] = gyAcMix * (pry[1] + gyDeltaPRY[1] * timeDelta) + (1-gyAcMix) * (acPR[1]);
-  pry[2] = pry[2] + gyDeltaPRY[2] * timeDelta + 1.73099999* timeDelta; // Added drift to yaw
+  pry[2] = pry[2] + gyDeltaPRY[2] * timeDelta;
 
   timePrev = timeNow;
 
