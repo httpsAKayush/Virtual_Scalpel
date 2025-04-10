@@ -1,15 +1,15 @@
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
 
-const char* ssid = "Galaxy";
-const char* password = "chaandsitare";
+const char* ssid = "Free";
+const char* password = "hehehaha";
 
 // Network
 IPAddress staticIP(192, 168, 137, 50);
 IPAddress gateway(192, 168, 137, 1);
 IPAddress subnet(255, 255, 255, 0);
-//IPAddress pcIP(192, 168, 137, 1);  // Your PC's IP
-IPAddress broadcastIP(192, 168, 137, 255);
+IPAddress pcIP(192, 168, 137, 1);  // Your PC's IP
+//IPAddress broadcastIP(192, 168, 137, 255);
 unsigned int port = 25668;        // Port for flex sensor data
 
 WiFiUDP Udp;
@@ -39,8 +39,9 @@ void setup() {
 }
 
 void loop() {
-  static float smoothedValue = analogRead(flexPin);
   int rawValue = analogRead(flexPin);
+  static float smoothedValue = analogRead(flexPin);
+  
   smoothedValue = (1 - SMOOTHING_FACTOR) * smoothedValue + SMOOTHING_FACTOR * rawValue;
 
   int bendPercentage = map(smoothedValue, FLAT_VALUE, BEND_VALUE, 0,100);
@@ -58,7 +59,7 @@ void loop() {
   // Send over UDP
   char data[10];
   sprintf(data, "%d", bendPercentage);
-  Udp.beginPacket(broadcastIP, port);
+  Udp.beginPacket(pcIP, port);
   Udp.write(data);
   Udp.endPacket();
 
