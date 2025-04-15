@@ -5,8 +5,8 @@
 #include <WiFiUdp.h>
 
 // WiFi credentials
-const char* ssid = "Ak";
-const char* password = "12345678";
+const char* ssid = "Free";
+const char* password = "hehehaha";
 
 // Static IP config
 IPAddress staticIP(192, 168, 137, 50);
@@ -20,6 +20,10 @@ WiFiUDP Udp;
 
 // Flex sensor pins (thumb, index, middle, ring)
 const int FLEX_PINS[4] = {32, 33, 34, 35};
+const int JOY_X_PIN = 36; // VP - X-axis
+const int JOY_Y_PIN = 39; // VN - Y-axis
+
+
 
 // Calibrated flex values
 const int FLEX_FLAT[4] = {700, 780, 700, 620};  // Hand open
@@ -131,10 +135,12 @@ void loop() {
     bendValues[i] = (int)normalized;
    // Serial.println(smoothedRaw[i]);
   }
+  int xValue = analogRead(JOY_X_PIN);  // Read X-axis
+  int yValue = analogRead(JOY_Y_PIN);  // Read Y-axis
 
   // Prepare the message: "PITCH,ROLL,YAW,THUMB,INDEX,MIDDLE,RING"
   char buffer[128];
-  sprintf(buffer, "%.2f,%.2f,%.2f,%d,%d,%d,%d", pitch, roll, yaw, bendValues[0], bendValues[1], bendValues[2], bendValues[3]);
+  sprintf(buffer, "%.2f,%.2f,%.2f,%d,%d,%d,%d,%d,%d", pitch, roll, yaw, bendValues[0], bendValues[1], bendValues[2], bendValues[3],xValue, yValue);
 
   // Send the data over UDP
   Udp.beginPacket(ipBroadCast, port);
@@ -147,3 +153,22 @@ void loop() {
   // Small delay to regulate packet rate
   delay(10);
 }
+// // Define analog input pins for joystick
+// const int JOY_X_PIN = 36; // VP - X-axis
+// const int JOY_Y_PIN = 39; // VN - Y-axis
+
+
+// void setup() {
+//   Serial.begin(115200);
+
+//   pinMode(JOY_SW_PIN, INPUT_PULLUP); // Use internal pull-up for button
+// }
+
+// void loop() {
+//   int xValue = analogRead(JOY_X_PIN);  // Read X-axis
+//   int yValue = analogRead(JOY_Y_PIN);  // Read Y-axis
+ 
+
+
+//   delay(200);
+// }
